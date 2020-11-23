@@ -10,40 +10,43 @@ export class LocationService {
     constructor() {
         this.watchId = null;
         if (this.isSupported) {
-            console.info("locationService ready");
+            console.info("LocationService: ready");
         } else {
-            console.warn("locationService unavailable");
+            console.warn("LocationService: unavailable");
             this.showPositionUnavailable();
         }
     }
 
-    updateLocation(): void {
+    update(): void {
         navigator.geolocation.getCurrentPosition(this.showPosition, this.showPositionError, this.positionOptions);
+        console.info("LocationService.update: OK");
     }
 
-    registerLocationUpdates(): void {
+    subscribe(): void {
         if (!this.isSupported) {
             return;
         }
 
         if (this.watchId) {
-            console.warn("registerLocationUpdates: Already tracking location");
+            console.warn("LocationService.subscribe: Already subscribed");
             return;
         }
         this.watchId = navigator.geolocation.watchPosition(this.showPosition, this.showPositionError, this.positionOptions)
+        console.info("LocationService.subscribe: OK");
     }
 
-    unregisterLocationUpdates(): void {
+    unsubscribe(): void {
         if (!this.isSupported) {
             return;
         }
 
         if (!this.watchId) {
-            console.warn("unregisterLocationUpdates: Location is not tracked");
+            console.warn("LocationService.unsubscribe: Already unsubscribed");
             return;
         }
         navigator.geolocation.clearWatch(this.watchId);
         this.watchId = null;
+        console.info("LocationService.unsubscribe: OK");
     }
 
     private showPosition(position: GeolocationPosition): void {

@@ -1,4 +1,5 @@
 import { LocationService } from "./locationService.js"
+import { OrientationService } from "./orientationService.js"
 
 let message: string = 'Hello, World!';
 // create a new heading 1 element
@@ -8,8 +9,9 @@ heading.textContent = message;
 document.body.appendChild(heading);
 
 let locationService = new LocationService();
-locationService.updateLocation();
-locationService.registerLocationUpdates();
+locationService.update();
+locationService.subscribe();
 
-// TODO: orientation
+let orientationService = new OrientationService();
+orientationService.subscribe();
 
