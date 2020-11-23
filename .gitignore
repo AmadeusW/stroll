@@ -1,6 +1,9 @@
 # Output directory
 dist/
 
+# tools
+.vscode/
+
 ### Standard Node.gitingore file:
 
 # Logs
