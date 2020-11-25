@@ -1,38 +1,46 @@
 export class OrientationService {
-    readonly isSupported = 'DeviceOrientationEvent' in window;
-    readonly positionOptions: PositionOptions = { // https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions
-        enableHighAccuracy: true, // if true, we would like to receive the best possible results, but increased power consumption on mobile
-        timeout: Infinity, // ms
-        maximumAge: 5000, // cached position freshness, ms
-    };
-    private subscribed: boolean;
+    private isSupported = false;
+    private subscribed: boolean = false;
 
     constructor() {
-        this.subscribed = false;
-        if (this.isSupported) {
-            console.info("OrientationService: ready");
-        } else {
-            console.warn("OrientationService: unavailable");
-            this.showOrientationUnavailable();
-        }
+
     }
+
+    private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
     update(): void {
         console.info("OrientationService.update: Not Applicable. Subscribe instead");
     }
 
     subscribe(): void {
-        if (!this.isSupported) {
-            return;
-        }
-
         if (this.subscribed) {
             console.warn("OrientationService.subscribe: Already subscribed");
             return;
         }
         this.subscribed = true;
-        window.addEventListener("deviceorientation", this.deviceOrientationListener);
-        console.info("OrientationService.subscribe: OK");
+        if (this.isIos) {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response == 'granted') {
+                        console.info("OrientationService: ready");
+                        window.addEventListener("deviceorientation", this.deviceOrientationListener, true);
+                        console.info("OrientationService.subscribe: OK");
+                    }
+                    else
+                    {
+                        console.warn("OrientationService: unavailable");
+                        this.subscribed = false;
+                        this.showOrientationUnavailable();
+                    }
+                })
+                .catch((error) => {
+                    console.warn("OrientationService: " + error);
+                    this.subscribed = false;
+                    alert("OrientationService: " + error)
+                });
+        } else {
+            window.addEventListener("deviceorientationabsolute", this.deviceOrientationListener, true);
+        }
     }
 
     unsubscribe(): void {

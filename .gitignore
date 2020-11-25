@@ -1,6 +1,9 @@
 # Output directory
 dist/
 
+# SSL Certificates
+*.pem
+
 # tools
 .vscode/
 
