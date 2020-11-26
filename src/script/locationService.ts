@@ -17,11 +17,6 @@ export class LocationService {
         }
     }
 
-    update(): void {
-        navigator.geolocation.getCurrentPosition(this.showPosition, this.showPositionError, this.positionOptions);
-        console.info("LocationService.update: OK");
-    }
-
     subscribe(): void {
         if (!this.isSupported) {
             return;
@@ -31,6 +26,7 @@ export class LocationService {
             console.warn("LocationService.subscribe: Already subscribed");
             return;
         }
+        navigator.geolocation.getCurrentPosition(this.showPosition, this.showPositionError, this.positionOptions);
         this.watchId = navigator.geolocation.watchPosition(this.showPosition, this.showPositionError, this.positionOptions)
         console.info("LocationService.subscribe: OK");
     }

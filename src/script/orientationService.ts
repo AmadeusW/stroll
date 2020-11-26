@@ -1,5 +1,4 @@
 export class OrientationService {
-    private isSupported = false;
     private subscribed: boolean = false;
 
     constructor() {
@@ -8,22 +7,20 @@ export class OrientationService {
 
     private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
-    update(): void {
-        console.info("OrientationService.update: Not Applicable. Subscribe instead");
-    }
-
     subscribe(): void {
+        console.log("OrientationService.subscribe...");
         if (this.subscribed) {
             console.warn("OrientationService.subscribe: Already subscribed");
             return;
         }
-        this.subscribed = true;
+
         if (this.isIos) {
             DeviceOrientationEvent.requestPermission()
                 .then(response => {
                     if (response == 'granted') {
                         console.info("OrientationService: ready");
                         window.addEventListener("deviceorientation", this.deviceOrientationListener, true);
+                        this.subscribed = true;
                         console.info("OrientationService.subscribe: OK");
                     }
                     else
@@ -40,20 +37,26 @@ export class OrientationService {
                 });
         } else {
             window.addEventListener("deviceorientationabsolute", this.deviceOrientationListener, true);
+            this.subscribed = true;
         }
+        console.info("OrientationService.subscribe: OK");
     }
 
     unsubscribe(): void {
-        if (!this.isSupported) {
-            return;
-        }
+        console.log("OrientationService.unsubscribe...");
 
         if (!this.subscribed) {
             console.warn("OrientationService.unsubscribe: Already unsubscribed");
             return;
         }
+
+        if (this.isIos) {
+            window.removeEventListener("deviceorientation", this.deviceOrientationListener, true);
+        } else {
+            window.removeEventListener("deviceorientationabsolute", this.deviceOrientationListener, true);
+        }
+
         this.subscribed = false;
-        window.removeEventListener("deviceorientation", this.deviceOrientationListener);
         console.info("OrientationService.unsubscribe: OK");
     }
 
