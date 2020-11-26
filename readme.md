@@ -16,7 +16,7 @@
     * Fixed zoom
     * Overlay avatar
 
-## Notes
+## Dev log
 
 ### 2020-11-23: It seems that compass doesn't work
 * It doesn't seem like orientation is available on iOS. I guess this project is over; I want to keep this a website and not an app
@@ -26,6 +26,14 @@
   * Permission may be granted only from user's action, e.g. mouse click
   * https might be necessary. I added self signed certificates
   * demo: https://dev.to/gigantz/real-compass-on-mobile-browsers-with-javascript-3emi
+
+### 2020-11-25: Cleaned up the subscribe\unsubscribe code. Thoughts on rx library
+* There are no runtime warnings, I can start and stop both services with a push of a button
+* I considered rxjs, cyclejs, kefir and mostjs.
+  * kefir - 👎 it's not typescript. I want to take full advantage of typescript and don't want to go through extra hoops
+  * rxjs - 👎 not very sure where to start. Is this a framework which underlies other libraries?
+  * cyclejs - tempting, but all examples use the virtual DOM. I don't think I want to go all the way functional
+  * mostjs - 👍 it seems the most lean, and it seems that I can easily hook it up to HTML5 events
 
 ### Thoughts
 
