@@ -16,7 +16,7 @@ export class UiService {
             console.error("UiService: button unavailable.");
         }
         this.subscribeCallback = subscribeCallback;
-        this.unsubscribeCallback = unsubscribeCallback;\
+        this.unsubscribeCallback = unsubscribeCallback;
 
         this.goButton.innerHTML = "Go";
         this.goButton.addEventListener("click", () => this.buttonClickHandler());
