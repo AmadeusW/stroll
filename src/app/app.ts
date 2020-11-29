@@ -1,7 +1,7 @@
-import { UiService } from "./uiService.js"
-import { LocationService } from "./locationService.js"
-import { OrientationService } from "./orientationService.js"
-import { ExperimentService } from "./experimentService.js"
+import { UiService } from "./uiService"
+import { LocationService } from "./locationService"
+import { OrientationService } from "./orientationService"
+import { ExperimentService } from "./experimentService"
 
 let orientationService = new OrientationService();
 let locationService = new LocationService();

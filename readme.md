@@ -52,6 +52,11 @@
   * Look at kriasoft starter kits, as well as https://github.com/Microsoft/TypeScript-Babel-Starter
   * For self signed certs, I can use a range of IPs. I can use xip.io since certs are for domains not bare ips.
 
+### 2020-11-29: Got webpack to work
+* I got webpack to bundle all necessary js into a single file
+  * The observable package works fine
+  * I'm not using Babel whose compiler was throwing syntax errors 
+
 ### Thoughts
 
 App Organization: Consider using Promises everywhere for uniform API.

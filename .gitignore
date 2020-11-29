@@ -1,5 +1,8 @@
-# Output directory
+# TypeScript transpiler output directory
 out/
+
+# Webpack output directory
+dist/
 
 # SSL Certificates
 *.pem
