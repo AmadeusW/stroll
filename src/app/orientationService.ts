@@ -1,11 +1,60 @@
+import { combine, map, runEffects, startWith, tap } from '@most/core'
+import { newDefaultScheduler } from '@most/scheduler'
+import { createAdapter } from '@most/adapter'
+import { Stream } from '@most/types'
+
 export class OrientationService {
+
+    private readonly induceCallback: (event: DeviceOrientationEvent) => void;
+    private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
+    private readonly out: HTMLElement;
     private subscribed: boolean = false;
+    private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
     constructor() {
 
+        this.out = document.getElementById('orientation') as HTMLElement;
+        this.boundEventListener = this.deviceOrientationListener.bind(this);
+        let [induceCallback, eventStream] = createAdapter<DeviceOrientationEvent>();
+        this.induceCallback = induceCallback;
+
+        // TODO: Use portrait/landscape mode to augment the stream
+        let getAlpha = (e: DeviceOrientationEvent) => e.alpha;
+        let render = (result: String) => {this.out.innerHTML = `${result}`; };
+        let alphas = map(getAlpha, eventStream);
+        let orientations = map(this.getOrientationFromAlpha, alphas);
+        let rendering = tap(render, orientations);
+        runEffects(rendering, newDefaultScheduler());
     }
 
-    private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
+    private deviceOrientationListener(event: DeviceOrientationEvent): void {
+        this.induceCallback(event);
+    }
+
+    getOrientationFromAlpha(a: number | null): string {
+        if (!a)
+            return "x";
+        else if (a < 22.5)
+            return "N";
+        else if (a < 67.5)
+            return "NE";
+        else if (a < 112.5)
+            return "E";
+        else if (a < 157.5)
+            return "SE";
+        else if (a < 202.5)
+            return "S";
+        else if (a < 247.5)
+            return "SW";
+        else if (a < 292.5)
+            return "W";
+        else if (a < 337.5)
+            return "NW";
+        else if (a < 360.5)
+            return "N";
+        else
+            return "";
+    }
 
     subscribe(): void {
         console.log("OrientationService.subscribe...");
@@ -19,7 +68,7 @@ export class OrientationService {
                 .then(response => {
                     if (response == 'granted') {
                         console.info("OrientationService: ready");
-                        window.addEventListener("deviceorientation", this.deviceOrientationListener, true);
+                        window.addEventListener("deviceorientation", this.boundEventListener);
                         this.subscribed = true;
                         console.info("OrientationService.subscribe: OK");
                     }
@@ -36,7 +85,7 @@ export class OrientationService {
                     alert("OrientationService: " + error)
                 });
         } else {
-            window.addEventListener("deviceorientationabsolute", this.deviceOrientationListener, true);
+            window.addEventListener("deviceorientationabsolute", this.boundEventListener);
             this.subscribed = true;
         }
         console.info("OrientationService.subscribe: OK");
@@ -51,19 +100,13 @@ export class OrientationService {
         }
 
         if (this.isIos) {
-            window.removeEventListener("deviceorientation", this.deviceOrientationListener, true);
+            window.removeEventListener("deviceorientation", this.boundEventListener);
         } else {
-            window.removeEventListener("deviceorientationabsolute", this.deviceOrientationListener, true);
+            window.removeEventListener("deviceorientationabsolute", this.boundEventListener);
         }
 
         this.subscribed = false;
         console.info("OrientationService.unsubscribe: OK");
-    }
-
-    private deviceOrientationListener(event: DeviceOrientationEvent): void {
-        let locationContainer = document.getElementById('orientation') as HTMLElement;
-        if (locationContainer && event)
-            locationContainer.innerHTML = "[" + event.alpha?.toFixed(0) + ", " + event.beta?.toFixed(0) + ", " + event.gamma?.toFixed(0) + "]";
     }
 
     private showOrientationUnavailable(): void {

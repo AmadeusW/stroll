@@ -1,5 +1,4 @@
 import { combine, map, runEffects, startWith, tap } from '@most/core'
-import { mousemove } from '@most/dom-event'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
 
@@ -21,8 +20,6 @@ export class ExperimentService {
         let mouseEventToNumber = (e:MouseEvent) => e.clientX;
         let renderResult = (result:number) => { this.out.innerHTML = `${result}`; };
 
-        //let mouseStream = mousemove(document, false);
-        //let mouseX = startWith(0, map(mouseEventToNumber,  mouseStream));
         let mouseX = startWith(0, map(mouseEventToNumber, inducedEvents));
         let result = combine(double, mouseX, mouseX);
         let outputEffects = tap(renderResult, result);
@@ -31,6 +28,5 @@ export class ExperimentService {
 
     AddToMyStream(event: MouseEvent): void {
         this.inducer(event);
-        //this.out.innerHTML = `${event.clientX}`;
     }
 }

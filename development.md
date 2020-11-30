@@ -43,6 +43,9 @@
 * I can enqueue arbitrary data onto the stream using @most/adapters.createAdapter
   * Demostrated in experimentService
   * Refactoring locationService and orientationService
+* I learned how to pass bind to event handlers
+  * create event handler with .bind(this)
+  * store the reference to event handler for future use in addEventHandler and removeEventHandler
 
 ## TODO
 
