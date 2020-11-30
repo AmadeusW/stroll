@@ -1,34 +1,41 @@
-import { combine, map, runEffects, startWith, tap } from '@most/core'
+import { map, runEffects, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
-import { Stream } from '@most/types'
+
+interface WebkitDeviceOrientationEvent extends DeviceOrientationEvent {
+    webkitCompassHeading: number;
+}
 
 export class OrientationService {
-
-    private readonly induceCallback: (event: DeviceOrientationEvent) => void;
+    private readonly induceCallback: (event: number) => void;
     private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
     private readonly out: HTMLElement;
     private subscribed: boolean = false;
     private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
     constructor() {
-
         this.out = document.getElementById('orientation') as HTMLElement;
         this.boundEventListener = this.deviceOrientationListener.bind(this);
-        let [induceCallback, eventStream] = createAdapter<DeviceOrientationEvent>();
+        let [induceCallback, eventStream] = createAdapter<number>();
         this.induceCallback = induceCallback;
 
-        // TODO: Use portrait/landscape mode to augment the stream
-        let getAlpha = (e: DeviceOrientationEvent) => e.alpha;
+        // TODO: Use combine to augment the stream with portrait/landscape mode information
         let render = (result: String) => {this.out.innerHTML = `${result}`; };
-        let alphas = map(getAlpha, eventStream);
-        let orientations = map(this.getOrientationFromAlpha, alphas);
+        let orientations = map(this.getOrientationFromAlpha, eventStream);
         let rendering = tap(render, orientations);
         runEffects(rendering, newDefaultScheduler());
     }
 
     private deviceOrientationListener(event: DeviceOrientationEvent): void {
-        this.induceCallback(event);
+        let alpha = 0;
+        let webkitCompassHeading = (event as WebkitDeviceOrientationEvent).webkitCompassHeading;
+        if (webkitCompassHeading) {
+            alpha = webkitCompassHeading;
+        }
+        else if (event.alpha) {
+            alpha = Math.abs(event.alpha - 360);
+        }
+        this.induceCallback(alpha);
     }
 
     getOrientationFromAlpha(a: number | null): string {
