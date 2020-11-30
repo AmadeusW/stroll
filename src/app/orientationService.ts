@@ -7,9 +7,9 @@ interface WebkitDeviceOrientationEvent extends DeviceOrientationEvent {
 }
 
 export class OrientationService {
-    private readonly induceCallback: (event: number) => void;
-    private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
     private readonly out: HTMLElement;
+    private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
+    private readonly induceCallback: (event: number) => void;
     private subscribed: boolean = false;
     private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 

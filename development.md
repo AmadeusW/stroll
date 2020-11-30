@@ -1,5 +1,18 @@
 # Dev notes
 
+## TODO
+
+* Rendering
+  * Consider https://leafletjs.com/examples.html
+    * Fixed zoom
+    * Overlay avatar
+* Reactive programming
+  * Correctly handle error conditions
+    * Currently i'm using imperative calls
+* Deployment
+  * push to github
+  * deploy to netlify
+
 ## Log
 
 ### 2020-11-23: It seems that compass doesn't work
@@ -46,13 +59,6 @@
 * I learned how to pass bind to event handlers
   * create event handler with .bind(this)
   * store the reference to event handler for future use in addEventHandler and removeEventHandler
-
-## TODO
-
-* Rendering
-  * Consider https://leafletjs.com/examples.html
-    * Fixed zoom
-    * Overlay avatar
 
 ## Thoughts
 
