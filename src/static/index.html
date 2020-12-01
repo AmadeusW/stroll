@@ -10,11 +10,13 @@
 </head>
 <body>
     <script type="module" src="stroll.js"></script>
-    <p id="location">Location</p>
-    <p id="orientation">Orientation</p>
-    <button id="button">Go</button>
-    <p id="experiment">Experiment</p>
+    <p>
+        <button id="button">Go</button>
+        <span id="orientation">Orientation</span>,
+        <span id="location">Location</span>
+    </p>
     <div id="map" style="height: 300px"></div>
+    <p id="experiment"></p>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
