@@ -1,4 +1,4 @@
-import { map, runEffects, take, tap } from '@most/core'
+import { map, runEffects, skip, take, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
 import * as L from 'leaflet';
@@ -25,9 +25,11 @@ export class LocationService {
         let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
         let asString = map(this.toString, eventStream);
         let renderStringStream = tap(stringRendering, asString);
-        let renderMapStream = tap(this.initialMapRendering, take(1,eventStream));
+        let initialRenderMapStream = tap(this.initialMapRendering, take(1,eventStream));
+        let continuousRenderMapStream = tap(this.continuousMapRendering, skip(1,eventStream));
         runEffects(renderStringStream, newDefaultScheduler());
-        runEffects(renderMapStream, newDefaultScheduler());
+        runEffects(initialRenderMapStream, newDefaultScheduler());
+        runEffects(continuousRenderMapStream, newDefaultScheduler());
 
         if (this.isSupported) {
             console.info("LocationService: ready");
@@ -53,6 +55,15 @@ export class LocationService {
         zoomOffset: -1,
         accessToken: process.env.MAPBOX_TOKEN
         }).addTo(mymap);
+
+        // Store the map in a global variable for later access
+        (window as any).__MAP = mymap;
+    }
+
+    private continuousMapRendering(coordinates: GeolocationCoordinates): void {
+        console.log(`Panning the map to ${coordinates}`);
+        let map = (window as any).__MAP as L.Map;
+        map.panTo([coordinates.latitude, coordinates.longitude]);
     }
 
     private toString(coordinates: GeolocationCoordinates): string {

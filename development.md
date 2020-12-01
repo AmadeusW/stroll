@@ -9,9 +9,6 @@
 * Reactive programming
   * Correctly handle error conditions
     * Currently i'm using imperative calls
-* Deployment
-  * push to github
-  * deploy to netlify
 
 ## Log
 
@@ -59,6 +56,25 @@
 * I learned how to pass bind to event handlers
   * create event handler with .bind(this)
   * store the reference to event handler for future use in addEventHandler and removeEventHandler
+
+### 2020-11-30: Mapping integration
+* I integrated with mapbox using leaflet.js
+  * Used an old API key I used a few years ago to make laser-cut coasters
+  * dotenv webpack plugin helped me hide the API key in a file
+  * I need to add that environment variable to netlify
+* mostjs is strictly functional
+  * `this` is not available in a callback working on a stream
+  * I can access `this` in an inline lambda, but not in a dedicated function
+  * 🙋‍♂️ How can I use utility functions available in my class?
+    * I should try making them static
+* netlify deployment is smooth
+  * gotta try setting environment variables on netlify and see if dotenv picks them up
+
+### 2020-12-01: Storing the map in a global variable
+* leaflet.js initializes the map exactly once
+  * I need to store its reference in a global variable
+  * using (window as any) to access that reference
+  * With the reference to the map, I get panning to work. Now the map follows the user.
 
 ## Thoughts
 
