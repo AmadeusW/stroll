@@ -7,6 +7,9 @@ dist/
 # SSL Certificates
 *.pem
 
+# Secrets
+*.env
+
 # tools
 .vscode/
 

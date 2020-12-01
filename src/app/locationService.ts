@@ -1,6 +1,7 @@
-import { map, runEffects, tap } from '@most/core'
+import { map, runEffects, take, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
+import * as L from 'leaflet';
 
 export class LocationService {
     readonly isSupported = 'geolocation' in navigator;
@@ -21,10 +22,12 @@ export class LocationService {
         let [induceCallback, eventStream] = createAdapter<GeolocationCoordinates>();
         this.induceCallback = induceCallback;
 
-        let render = (result: String) => {this.out.innerHTML = `${result}`; };
-        let trimmed = map(this.toString, eventStream);
-        let rendering = tap(render, trimmed);
-        runEffects(rendering, newDefaultScheduler());
+        let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
+        let asString = map(this.toString, eventStream);
+        let renderStringStream = tap(stringRendering, asString);
+        let renderMapStream = tap(this.initialMapRendering, take(1,eventStream));
+        runEffects(renderStringStream, newDefaultScheduler());
+        runEffects(renderMapStream, newDefaultScheduler());
 
         if (this.isSupported) {
             console.info("LocationService: ready");
@@ -36,6 +39,20 @@ export class LocationService {
 
     private positionHandler(position: GeolocationPosition): void {
         this.induceCallback(position.coords); // there's also timestamp
+    }
+
+    private initialMapRendering(coordinates: GeolocationCoordinates): void {
+        console.log(`Rendering ${coordinates} as map`);
+        //console.log(`Rendering ${this.toString(coordinates)} as map`);
+        let mymap = L.map('map').setView([coordinates.latitude, coordinates.longitude], 16);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox/streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: process.env.MAPBOX_TOKEN
+        }).addTo(mymap);
     }
 
     private toString(coordinates: GeolocationCoordinates): string {

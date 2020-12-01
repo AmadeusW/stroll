@@ -1,4 +1,5 @@
-const copyWebpackPlugin = require('copy-webpack-plugin');
+const copyPlugin = require('copy-webpack-plugin');
+const dotenvPlugin = require('dotenv-webpack');
 var path = require('path');
 
 module.exports = {
@@ -20,10 +21,13 @@ module.exports = {
         }],
     },
     plugins: [
-        new copyWebpackPlugin({
+        new copyPlugin({
             patterns: [
                 { from: "src/static", to: "."}
             ]
+        }),
+        new dotenvPlugin({
+            path: './secrets.env'
         })
     ]
 };
