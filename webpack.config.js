@@ -27,7 +27,8 @@ module.exports = {
             ]
         }),
         new dotenvPlugin({
-            path: './secrets.env'
+            path: './secrets.env',
+            systemvars: true
         })
     ]
 };
