@@ -14,6 +14,7 @@ export class LocationService {
     private readonly out: HTMLElement;
     private readonly boundEventListener: (event: GeolocationPosition) => void;
     private readonly induceCallback: (event: GeolocationCoordinates) => void;
+    private readonly defaultCoordinates = new Coordinates(47.6089872, -122.3406822);
 
     constructor() {
         this.watchId = null;
@@ -21,15 +22,14 @@ export class LocationService {
         this.boundEventListener = this.positionHandler.bind(this);
         let [induceCallback, eventStream] = createAdapter<GeolocationCoordinates>();
         this.induceCallback = induceCallback;
+        this.initializeMap(this.defaultCoordinates);
 
         let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
         let asString = map(this.toString, eventStream);
         let renderStringStream = tap(stringRendering, asString);
-        let initialRenderMapStream = tap(this.initialMapRendering, take(1,eventStream));
-        let continuousRenderMapStream = tap(this.continuousMapRendering, skip(1,eventStream));
+        let renderMapStream = tap(this.updateMap, eventStream);
         runEffects(renderStringStream, newDefaultScheduler());
-        runEffects(initialRenderMapStream, newDefaultScheduler());
-        runEffects(continuousRenderMapStream, newDefaultScheduler());
+        runEffects(renderMapStream, newDefaultScheduler());
 
         if (this.isSupported) {
             console.info("LocationService: ready");
@@ -43,9 +43,7 @@ export class LocationService {
         this.induceCallback(position.coords); // there's also timestamp
     }
 
-    private initialMapRendering(coordinates: GeolocationCoordinates): void {
-        console.log(`Rendering ${coordinates} as map`);
-        //console.log(`Rendering ${this.toString(coordinates)} as map`);
+    private initializeMap(coordinates: GeolocationCoordinates): void {
         let mymap = L.map('map').setView([coordinates.latitude, coordinates.longitude], 16);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -60,7 +58,7 @@ export class LocationService {
         (window as any).__MAP = mymap;
     }
 
-    private continuousMapRendering(coordinates: GeolocationCoordinates): void {
+    private updateMap(coordinates: GeolocationCoordinates): void {
         console.log(`Panning the map to ${coordinates}`);
         let map = (window as any).__MAP as L.Map;
         map.panTo([coordinates.latitude, coordinates.longitude]);
@@ -118,4 +116,24 @@ export class LocationService {
         if (locationContainer)
             locationContainer.innerHTML = 'Geolocation is not available';
     }
+}
+
+export class Coordinates implements GeolocationCoordinates {
+    constructor(latitude: number, longitude: number) {
+        this.accuracy = 1;
+        this.altitude = 36;
+        this.altitudeAccuracy = 1;
+        this.heading = null;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.speed = null;
+    }
+
+    accuracy: number;
+    altitude: number | null;
+    altitudeAccuracy: number | null;
+    heading: number | null;
+    latitude: number;
+    longitude: number;
+    speed: number | null;
 }
