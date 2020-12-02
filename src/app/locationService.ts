@@ -25,7 +25,7 @@ export class LocationService {
         this.initializeMap(this.defaultCoordinates);
 
         let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
-        let asString = map(this.toString, eventStream);
+        let asString = map(LocationService.print, eventStream);
         let renderStringStream = tap(stringRendering, asString);
         let renderMapStream = tap(this.updateMap, eventStream);
         runEffects(renderStringStream, newDefaultScheduler());
@@ -59,12 +59,12 @@ export class LocationService {
     }
 
     private updateMap(coordinates: GeolocationCoordinates): void {
-        console.log(`Panning the map to ${coordinates}`);
+        console.log(`Panning the map to ${LocationService.print(coordinates)}`);
         let map = (window as any).__MAP as L.Map;
         map.panTo([coordinates.latitude, coordinates.longitude]);
     }
 
-    private toString(coordinates: GeolocationCoordinates): string {
+    private static print(coordinates: GeolocationCoordinates): string {
         // See https://en.wikipedia.org/wiki/ISO_6709
         let latHemi = coordinates.latitude > 0 ? 'N' : 'S';
         let longHemi = coordinates.longitude > 0 ? 'E' : 'W';
