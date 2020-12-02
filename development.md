@@ -75,6 +75,8 @@
   * I need to store its reference in a global variable
   * using (window as any) to access that reference
   * With the reference to the map, I get panning to work. Now the map follows the user.
+* I made a utility method static
+  * I can use it within mostjs callbacks
 
 ## Thoughts
 
