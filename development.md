@@ -12,6 +12,14 @@
 
 ## Log
 
+### 2020-12-06: Refactor, added points of interested
+* It's great to come back when new ideas are ripe
+* Split MapService off LocationService
+  * Its responsibility is to draw points on the map
+  * Next service will provide data
+* Refactor retrieval from global variable
+  *  use `static Instance()` method to get instance stored in `globalThis`
+
 ### 2020-12-01: Storing the map in a global variable
 * leaflet.js initializes the map exactly once
   * I need to store its reference in a global variable
