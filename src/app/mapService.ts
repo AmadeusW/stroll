@@ -8,10 +8,16 @@ export class MapService {
     private readonly out: HTMLElement;
     private readonly locationService: LocationService;
     private readonly defaultCoordinates = new Coordinates(47.6089872, -122.3406822);
+    private map: L.Map | null = null; // assigned in intializeMap
+    private player: L.Marker<any> | null = null; // assigned in updateMapOnce
+    private sign: L.Marker<any> | null = null; // assigned in updateMapOnce
 
     constructor(locationService: LocationService) {
         this.locationService = locationService;
         this.out = document.getElementById('location') as HTMLElement;
+
+        // Store reference to this instance. Retrieved as MapService.Instance()
+        (globalThis as any).__MapService = this;
 
         // String stream:
         let asString = map(MapService.print, this.locationService.coordinate$);
@@ -20,14 +26,21 @@ export class MapService {
         runEffects(renderStringStream, newDefaultScheduler());
 
         // Map updates:
+        let initialMapRender = tap(this.updateMapOnce, take(1, this.locationService.coordinate$));
+        runEffects(initialMapRender, newDefaultScheduler());
         let renderMapStream = tap(this.updateMap, this.locationService.coordinate$);
         runEffects(renderMapStream, newDefaultScheduler());
 
         this.initializeMap(this.defaultCoordinates);
     }
 
+    private static Instance(): MapService
+    {
+        return (globalThis as any).__MapService as MapService;
+    }
+
     private initializeMap(coordinates: GeolocationCoordinates): void {
-        let mymap = L.map('map').setView([coordinates.latitude, coordinates.longitude], 16);
+        let map = L.map('map').setView([coordinates.latitude, coordinates.longitude], 16);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -35,16 +48,41 @@ export class MapService {
         tileSize: 512,
         zoomOffset: -1,
         accessToken: process.env.MAPBOX_TOKEN
-        }).addTo(mymap);
+        }).addTo(map);
 
-        // Store the map in a global variable for later access
-        (window as any).__MAP = mymap;
+        MapService.Instance().map = map;
+    }
+
+    private updateMapOnce(coordinates: GeolocationCoordinates): void {
+        console.log(`First map impression at ${MapService.print(coordinates)}`);
+        let map = MapService.Instance().map;
+        if (map === null) {
+            console.error(`Map unavailable`);
+            return;
+        }
+
+        let sign = L.marker([coordinates.latitude, coordinates.longitude + 0.001]);
+        sign.addTo(MapService.Instance().map!)
+            .bindPopup('Sample point of interest.');
+
+        let player = L.marker([coordinates.latitude, coordinates.longitude]);
+        player.addTo(MapService.Instance().map!)
+            .bindPopup('Your location.')
+            .openPopup();
+
+        MapService.Instance().player = player;
+        MapService.Instance().sign = sign;
     }
 
     private updateMap(coordinates: GeolocationCoordinates): void {
         console.log(`Panning the map to ${MapService.print(coordinates)}`);
-        let map = (window as any).__MAP as L.Map;
-        map.panTo([coordinates.latitude, coordinates.longitude]);
+        if (map === null) {
+            console.error(`Map unavailable`);
+            return;
+        }
+
+        MapService.Instance().map!.panTo([coordinates.latitude, coordinates.longitude]);
+        MapService.Instance().player!.setLatLng([coordinates.latitude, coordinates.longitude])
     }
 
     private static print(coordinates: GeolocationCoordinates): string {
