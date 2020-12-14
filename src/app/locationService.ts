@@ -4,6 +4,8 @@ import { createAdapter } from '@most/adapter'
 import { Stream } from '@most/types'
 
 export class LocationService {
+    public readonly coordinate$: Stream<GeolocationCoordinates>;
+
     readonly isSupported = 'geolocation' in navigator;
     readonly positionOptions: PositionOptions = { // https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions
         enableHighAccuracy: true, // if true, we would like to receive the best possible results, but increased power consumption on mobile
@@ -13,7 +15,6 @@ export class LocationService {
     private watchId: number | null;
     private readonly boundEventListener: (event: GeolocationPosition) => void;
     private readonly induceCallback: (event: GeolocationCoordinates) => void;
-    public readonly coordinate$: Stream<GeolocationCoordinates>;
 
     constructor() {
         this.watchId = null;

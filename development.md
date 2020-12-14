@@ -12,7 +12,13 @@
 
 ## Log
 
-### 2020-12-06: Refactor, added points of interested
+### 2020-12-14
+* Rotate the player marker with orientation
+  * Prototype to show I can pushthe data to the correct location
+  * Next step is to use a player icon
+  * And to enable this stream only if location streams, too
+
+### 2020-12-06: Refactor, added points of interest
 * It's great to come back when new ideas are ripe
 * Split MapService off LocationService
   * Its responsibility is to draw points on the map

@@ -1,12 +1,15 @@
 import { map, runEffects, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
+import { Stream } from '@most/types'
 
 interface WebkitDeviceOrientationEvent extends DeviceOrientationEvent {
     webkitCompassHeading: number;
 }
 
 export class OrientationService {
+    public readonly orientation$: Stream<number>;
+
     private readonly out: HTMLElement;
     private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
     private readonly induceCallback: (event: number) => void;
@@ -21,8 +24,9 @@ export class OrientationService {
 
         // TODO: Use combine to augment the stream with portrait/landscape mode information
         let render = (result: String) => {this.out.innerHTML = `${result}`; };
-        let orientations = map(this.getOrientationFromAlpha, eventStream);
-        let rendering = tap(render, orientations);
+        this.orientation$ = eventStream;
+        let orientationSymbol = map(this.getOrientationFromAlpha, eventStream);
+        let rendering = tap(render, orientationSymbol);
         runEffects(rendering, newDefaultScheduler());
     }
 

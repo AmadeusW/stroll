@@ -2,18 +2,22 @@ import { map, runEffects, skip, take, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { createAdapter } from '@most/adapter'
 import { LocationService } from "./locationService"
+import { OrientationService } from "./orientationService"
 import * as L from 'leaflet';
 
 export class MapService {
     private readonly out: HTMLElement;
     private readonly locationService: LocationService;
+    private readonly orientationService: OrientationService;
     private readonly defaultCoordinates = new Coordinates(47.6089872, -122.3406822);
     private map: L.Map | null = null; // assigned in intializeMap
     private player: L.Marker<any> | null = null; // assigned in updateMapOnce
+    private playerIcon: L.DivIcon | null = null; // assigned in updateMapOnce
     private sign: L.Marker<any> | null = null; // assigned in updateMapOnce
 
-    constructor(locationService: LocationService) {
+    constructor(locationService: LocationService, orientationService: OrientationService) {
         this.locationService = locationService;
+        this.orientationService = orientationService;
         this.out = document.getElementById('location') as HTMLElement;
 
         // Store reference to this instance. Retrieved as MapService.Instance()
@@ -26,10 +30,12 @@ export class MapService {
         runEffects(renderStringStream, newDefaultScheduler());
 
         // Map updates:
-        let initialMapRender = tap(this.updateMapOnce, take(1, this.locationService.coordinate$));
-        runEffects(initialMapRender, newDefaultScheduler());
-        let renderMapStream = tap(this.updateMap, this.locationService.coordinate$);
-        runEffects(renderMapStream, newDefaultScheduler());
+        let updateOnceStream = tap(this.updateMapOnce, take(1, this.locationService.coordinate$));
+        runEffects(updateOnceStream, newDefaultScheduler());
+        let updateStream = tap(this.updateMap, this.locationService.coordinate$);
+        runEffects(updateStream, newDefaultScheduler());
+        let orientationStream = tap(this.updateOrientation, this.orientationService.orientation$);
+        runEffects(orientationStream, newDefaultScheduler());
 
         this.initializeMap(this.defaultCoordinates);
     }
@@ -65,24 +71,43 @@ export class MapService {
         sign.addTo(MapService.Instance().map!)
             .bindPopup('Sample point of interest.');
 
-        let player = L.marker([coordinates.latitude, coordinates.longitude]);
+        let playerIcon = L.divIcon( { className: 'playerIcon', html: '<div id="playerIcon">😎</div>' });
+        let player = L.marker([coordinates.latitude, coordinates.longitude],
+            { icon: playerIcon });
         player.addTo(MapService.Instance().map!)
             .bindPopup('Your location.')
             .openPopup();
 
         MapService.Instance().player = player;
+        MapService.Instance().playerIcon = playerIcon;
         MapService.Instance().sign = sign;
     }
 
     private updateMap(coordinates: GeolocationCoordinates): void {
         console.log(`Panning the map to ${MapService.print(coordinates)}`);
-        if (map === null) {
+        if (MapService.Instance().map === undefined) {
             console.error(`Map unavailable`);
             return;
         }
 
         MapService.Instance().map!.panTo([coordinates.latitude, coordinates.longitude]);
         MapService.Instance().player!.setLatLng([coordinates.latitude, coordinates.longitude])
+    }
+
+    private updateOrientation(orientation: Number): void {
+        if (MapService.Instance().map === undefined) {
+            console.error(`Map unavailable`);
+            return;
+        }
+
+        let icon = document.getElementById('playerIcon') as HTMLElement;
+
+        if (icon === undefined || icon === null) {
+            console.error(`Icon unavailable, but the map is`);
+            return;
+        }
+
+        icon.style.transform = (`rotate(${orientation}deg)`);
     }
 
     private static print(coordinates: GeolocationCoordinates): string {
