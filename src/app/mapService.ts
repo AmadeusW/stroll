@@ -75,8 +75,7 @@ export class MapService {
         let player = L.marker([coordinates.latitude, coordinates.longitude],
             { icon: playerIcon });
         player.addTo(MapService.Instance().map!)
-            .bindPopup('Your location.')
-            .openPopup();
+            .bindPopup('Your location.');
 
         MapService.Instance().player = player;
         MapService.Instance().playerIcon = playerIcon;
