@@ -14,9 +14,7 @@
 
 ### 2020-12-16
 * Swap player marker's image with orientation
-* Next steps
-  * limit updates to only when orientation symbol actually changes
-  * make the character background transparent
+* Updates are limited to only when orientation symbol actually changes
 
 ### 2020-12-14
 * Rotate the player marker with orientation

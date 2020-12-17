@@ -34,7 +34,7 @@ export class MapService {
         runEffects(updateOnceStream, newDefaultScheduler());
         let updateStream = tap(this.updateMap, this.locationService.coordinate$);
         runEffects(updateStream, newDefaultScheduler());
-        let orientationStream = tap(this.updateOrientation, this.orientationService.orientation$);
+        let orientationStream = tap(this.updateOrientation, this.orientationService.orientationSymbol$);
         runEffects(orientationStream, newDefaultScheduler());
 
         this.initializeMap(this.defaultCoordinates);
