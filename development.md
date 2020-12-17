@@ -12,6 +12,12 @@
 
 ## Log
 
+### 2020-12-16
+* Swap player marker's image with orientation
+* Next steps
+  * limit updates to only when orientation symbol actually changes
+  * make the character background transparent
+
 ### 2020-12-14
 * Rotate the player marker with orientation
   * Prototype to show I can pushthe data to the correct location

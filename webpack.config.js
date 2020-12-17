@@ -23,7 +23,8 @@ module.exports = {
     plugins: [
         new copyPlugin({
             patterns: [
-                { from: "src/static", to: "."}
+                { from: "src/static", to: "."},
+                { from: "resources", to: "resources"}
             ]
         }),
         new dotenvPlugin({

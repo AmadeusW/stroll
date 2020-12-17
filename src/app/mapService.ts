@@ -71,7 +71,7 @@ export class MapService {
         sign.addTo(MapService.Instance().map!)
             .bindPopup('Sample point of interest.');
 
-        let playerIcon = L.divIcon( { className: 'playerIcon', html: '<div id="playerIcon">😎</div>' });
+        let playerIcon = L.divIcon( { className: 'characterContainer', html: '<img id="character" />' });
         let player = L.marker([coordinates.latitude, coordinates.longitude],
             { icon: playerIcon });
         player.addTo(MapService.Instance().map!)
@@ -94,20 +94,20 @@ export class MapService {
         MapService.Instance().player!.setLatLng([coordinates.latitude, coordinates.longitude])
     }
 
-    private updateOrientation(orientation: Number): void {
+    private updateOrientation(orientation: string): void {
         if (MapService.Instance().map === undefined) {
             console.error(`Map unavailable`);
             return;
         }
 
-        let icon = document.getElementById('playerIcon') as HTMLElement;
+        let icon = document.getElementById('character') as HTMLImageElement;
 
         if (icon === undefined || icon === null) {
             console.error(`Icon unavailable, but the map is`);
             return;
         }
 
-        icon.style.transform = (`rotate(${orientation}deg)`);
+        icon.src = `resources/character/${orientation}.png`;
     }
 
     private static print(coordinates: GeolocationCoordinates): string {

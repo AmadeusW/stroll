@@ -8,7 +8,7 @@ interface WebkitDeviceOrientationEvent extends DeviceOrientationEvent {
 }
 
 export class OrientationService {
-    public readonly orientation$: Stream<number>;
+    public readonly orientation$: Stream<string>;
 
     private readonly out: HTMLElement;
     private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
@@ -24,8 +24,8 @@ export class OrientationService {
 
         // TODO: Use combine to augment the stream with portrait/landscape mode information
         let render = (result: String) => {this.out.innerHTML = `${result}`; };
-        this.orientation$ = eventStream;
         let orientationSymbol = map(this.getOrientationFromAlpha, eventStream);
+        this.orientation$ = orientationSymbol;
         let rendering = tap(render, orientationSymbol);
         runEffects(rendering, newDefaultScheduler());
     }
@@ -64,7 +64,7 @@ export class OrientationService {
         else if (a < 360.5)
             return "N";
         else
-            return "";
+            return "x";
     }
 
     subscribe(): void {
