@@ -9,8 +9,17 @@
 * Reactive programming
   * Correctly handle error conditions
     * Currently i'm using imperative calls
+* Composition
+  * Subscribe\unsubscribe should be done by base abstract class or something like this
+    * I fill up just the business logic
 
 ## Log
+
+### 2020-12-17
+* Got the data!
+  * Added DataService to serve data
+  * For now, using sample data
+  * Really happe with how in TypeScript I can code non stop for half an hour and end up with a perfectly working code.
 
 ### 2020-12-16
 * Swap player marker's image with orientation

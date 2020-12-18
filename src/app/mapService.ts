@@ -1,21 +1,23 @@
-import { map, runEffects, skip, take, tap } from '@most/core'
+import { map, runEffects, take, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { createAdapter } from '@most/adapter'
 import { LocationService } from "./locationService"
 import { OrientationService } from "./orientationService"
+import { DataService, DataPoint } from "./dataService"
 import * as L from 'leaflet';
 
 export class MapService {
     private readonly out: HTMLElement;
     private readonly locationService: LocationService;
     private readonly orientationService: OrientationService;
+    private readonly dataService: DataService;
     private readonly defaultCoordinates = new Coordinates(47.6089872, -122.3406822);
     private map: L.Map | null = null; // assigned in intializeMap
     private player: L.Marker<any> | null = null; // assigned in updateMapOnce
     private playerIcon: L.DivIcon | null = null; // assigned in updateMapOnce
-    private sign: L.Marker<any> | null = null; // assigned in updateMapOnce
+    private markers: L.Marker<any>[] = []; // appended to in updateMarkers
 
-    constructor(locationService: LocationService, orientationService: OrientationService) {
+    constructor(locationService: LocationService, orientationService: OrientationService, dataService: DataService) {
+        this.dataService = dataService;
         this.locationService = locationService;
         this.orientationService = orientationService;
         this.out = document.getElementById('location') as HTMLElement;
@@ -36,6 +38,8 @@ export class MapService {
         runEffects(updateStream, newDefaultScheduler());
         let orientationStream = tap(this.updateOrientation, this.orientationService.orientationSymbol$);
         runEffects(orientationStream, newDefaultScheduler());
+        let dataStream = tap(this.updateMarkers, this.dataService.data$);
+        runEffects(dataStream, newDefaultScheduler());
 
         this.initializeMap(this.defaultCoordinates);
     }
@@ -67,10 +71,6 @@ export class MapService {
             return;
         }
 
-        let sign = L.marker([coordinates.latitude, coordinates.longitude + 0.001]);
-        sign.addTo(MapService.Instance().map!)
-            .bindPopup('Sample point of interest.');
-
         let playerIcon = L.divIcon( { className: 'characterContainer', html: '<img id="character" />' });
         let player = L.marker([coordinates.latitude, coordinates.longitude],
             { icon: playerIcon });
@@ -79,8 +79,7 @@ export class MapService {
 
         MapService.Instance().player = player;
         MapService.Instance().playerIcon = playerIcon;
-        MapService.Instance().sign = sign;
-    }
+     }
 
     private updateMap(coordinates: GeolocationCoordinates): void {
         console.log(`Panning the map to ${MapService.print(coordinates)}`);
@@ -107,6 +106,21 @@ export class MapService {
         }
 
         icon.src = `resources/character/${orientation}.png`;
+    }
+
+    private updateMarkers(data: DataPoint): void {
+        console.log(`Adding marker at ${MapService.print(data.coordinates)}`);
+        let map = MapService.Instance().map;
+        if (map === null) {
+            console.error(`Map unavailable`);
+            return;
+        }
+
+        let marker = L.marker([data.coordinates.latitude, data.coordinates.longitude]);
+        marker.addTo(MapService.Instance().map!)
+            .bindPopup(`<b>${data.title}</b><br />${data.description}`);
+
+        MapService.Instance().markers.push(marker);
     }
 
     private static print(coordinates: GeolocationCoordinates): string {
