@@ -1,5 +1,4 @@
-import { map, runEffects, skipRepeats, tap } from '@most/core'
-import { newDefaultScheduler } from '@most/scheduler'
+import { map, skipRepeats } from '@most/core'
 import { createAdapter } from '@most/adapter'
 import { Stream } from '@most/types'
 
@@ -10,24 +9,19 @@ interface WebkitDeviceOrientationEvent extends DeviceOrientationEvent {
 export class OrientationService {
     public readonly orientationSymbol$: Stream<string>;
 
-    private readonly out: HTMLElement;
     private readonly boundEventListener: (event: DeviceOrientationEvent) => void;
     private readonly induceCallback: (event: number) => void;
     private subscribed: boolean = false;
     private isIos = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
     constructor() {
-        this.out = document.getElementById('orientation') as HTMLElement;
         this.boundEventListener = this.deviceOrientationListener.bind(this);
         let [induceCallback, eventStream] = createAdapter<number>();
         this.induceCallback = induceCallback;
 
         // TODO: Use combine to augment the stream with portrait/landscape mode information
-        let render = (result: String) => {this.out.innerHTML = `${result}`; };
         let orientationSymbol = map(this.getOrientationFromAlpha, eventStream);
         this.orientationSymbol$ = skipRepeats(orientationSymbol);
-        let rendering = tap(render, orientationSymbol);
-        runEffects(rendering, newDefaultScheduler());
     }
 
     private deviceOrientationListener(event: DeviceOrientationEvent): void {

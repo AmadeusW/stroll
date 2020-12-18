@@ -1,4 +1,4 @@
-import { map, runEffects, take, tap } from '@most/core'
+import { combine, runEffects, take, tap } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { LocationService } from "./locationService"
 import { OrientationService } from "./orientationService"
@@ -20,26 +20,32 @@ export class MapService {
         this.dataService = dataService;
         this.locationService = locationService;
         this.orientationService = orientationService;
-        this.out = document.getElementById('location') as HTMLElement;
+        this.out = document.getElementById('debug') as HTMLElement;
 
         // Store reference to this instance. Retrieved as MapService.Instance()
         (globalThis as any).__MapService = this;
 
-        // String stream:
-        let asString = map(MapService.print, this.locationService.coordinate$);
+        let mapScheduler = newDefaultScheduler();
+
+        // Debug stream:
         let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
+        let asString = combine(
+            MapService.combine,
+            this.locationService.coordinate$,
+            this.orientationService.orientationSymbol$);
         let renderStringStream = tap(stringRendering, asString);
-        runEffects(renderStringStream, newDefaultScheduler());
+        runEffects(renderStringStream, mapScheduler);
 
         // Map updates:
         let updateOnceStream = tap(this.updateMapOnce, take(1, this.locationService.coordinate$));
-        runEffects(updateOnceStream, newDefaultScheduler());
+        runEffects(updateOnceStream, mapScheduler);
         let updateStream = tap(this.updateMap, this.locationService.coordinate$);
-        runEffects(updateStream, newDefaultScheduler());
+        runEffects(updateStream, mapScheduler);
+        // todo: update orientation only after location started sending data
         let orientationStream = tap(this.updateOrientation, this.orientationService.orientationSymbol$);
-        runEffects(orientationStream, newDefaultScheduler());
+        runEffects(orientationStream, mapScheduler);
         let dataStream = tap(this.updateMarkers, this.dataService.data$);
-        runEffects(dataStream, newDefaultScheduler());
+        runEffects(dataStream, mapScheduler);
 
         this.initializeMap(this.defaultCoordinates);
     }
@@ -121,6 +127,10 @@ export class MapService {
             .bindPopup(`<b>${data.title}</b><br />${data.description}`);
 
         MapService.Instance().markers.push(marker);
+    }
+
+    private static combine(coordinates: GeolocationCoordinates, orientation: string): string {
+        return `${MapService.print(coordinates)}, ${orientation}`;
     }
 
     private static print(coordinates: GeolocationCoordinates): string {
