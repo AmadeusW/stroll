@@ -11,7 +11,7 @@
     * Currently i'm using imperative calls
 * Composition
   * Subscribe\unsubscribe should be done by base abstract class or something like this
-    * I fill up just the business logic
+    * So that each class can just provide business logic
 
 ## Log
 
@@ -20,6 +20,9 @@
   * Added DataService to serve data
   * For now, using sample data
   * Really happe with how in TypeScript I can code non stop for half an hour and end up with a perfectly working code.
+* Did some RX refactoring
+  * Use only one scheduler, in mapService
+  * Use combine method to produce debug output from two streams
 
 ### 2020-12-16
 * Swap player marker's image with orientation
