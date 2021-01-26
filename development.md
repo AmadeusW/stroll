@@ -108,6 +108,10 @@
 ### 2020-11-23: It seems that compass doesn't work
 * It doesn't seem like orientation is available on iOS. I guess this project is over; I want to keep this a website and not an app
 
+### 2021-01-25: Welcome back
+* Back in development on another machine. Updated readme.md with steps how to set it up
+* Converted .kml to .geojson. Working on loading it up
+
 ## Thoughts
 
 App Organization: Consider using Promises everywhere for uniform API.
