@@ -15,6 +15,15 @@
 
 ## Log
 
+### 2022-04-19
+* Pivot
+  * I'd like to use this as a speedometer when riding a bike
+  * `GeolocationCoordinates` contains the `speed` and `altitude` property
+* Library idea
+  * To best dogfood, I'd like to gather data on a phone and reuse it during development
+  * Create a library which records a stream and then replays it
+  * Since recording happens on the phone, I should find or write an API on line which accepts an arbitrary object
+
 ### 2020-12-17
 * Got the data!
   * Added DataService to serve data
