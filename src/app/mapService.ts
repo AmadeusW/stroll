@@ -137,7 +137,8 @@ export class MapService {
         // See https://en.wikipedia.org/wiki/ISO_6709
         let latHemi = coordinates.latitude > 0 ? 'N' : 'S';
         let longHemi = coordinates.longitude > 0 ? 'E' : 'W';
-        return `${coordinates.latitude.toFixed(6)}${latHemi}, ${coordinates.longitude.toFixed(6)}${longHemi}`;
+        let speed = coordinates.speed?.toFixed(3);
+        return `${coordinates.latitude.toFixed(6)}${latHemi}, ${coordinates.longitude.toFixed(6)}${longHemi}. ${speed} speed`;
     }
 }
 

@@ -19,6 +19,7 @@ export class LocationService {
     constructor() {
         this.watchId = null;
         this.boundEventListener = this.positionHandler.bind(this);
+        // Parameter passed to incudeCallback will appear in the coordinate$ stream
         let [induceCallback, eventStream] = createAdapter<GeolocationCoordinates>();
         this.induceCallback = induceCallback;
         this.coordinate$ = eventStream;
@@ -32,7 +33,9 @@ export class LocationService {
     }
 
     private positionHandler(position: GeolocationPosition): void {
-        this.induceCallback(position.coords); // there's also timestamp
+        this.induceCallback(position.coords);
+        // note position.timestamp is also available,
+        // but position.coords computes properties that I need, e.g. speed
     }
 
     subscribe(): void {
