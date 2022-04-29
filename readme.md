@@ -13,8 +13,10 @@ Current direction is to facilitate something similar to [Jane's Walk](https://en
   * Paste `secrets.env` into `.`
     * Format: `KEY=value`
     * Values are accessible as `process.env.KEY`
+    * Required variables: `MAPBOX_TOKEN`
   * Create ssl cert and key in `.`
-    * Use OpenSSL to create
+    * Use OpenSSL to create:
+    * `openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem`
     * Necessary for dogfooding on iphone
   * `npm install --global http-server`
 * `npm install`

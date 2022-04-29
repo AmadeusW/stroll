@@ -6,7 +6,8 @@ import { DataService, DataPoint } from "./dataService"
 import * as L from 'leaflet';
 
 export class MapService {
-    private readonly out: HTMLElement;
+    private readonly outDebug: HTMLElement;
+    private readonly outSpeed: HTMLElement;
     private readonly locationService: LocationService;
     private readonly orientationService: OrientationService;
     private readonly dataService: DataService;
@@ -20,7 +21,8 @@ export class MapService {
         this.dataService = dataService;
         this.locationService = locationService;
         this.orientationService = orientationService;
-        this.out = document.getElementById('debug') as HTMLElement;
+        this.outDebug = document.getElementById('debug') as HTMLElement;
+        this.outSpeed = document.getElementById('speed') as HTMLElement;
 
         // Store reference to this instance. Retrieved as MapService.Instance()
         (globalThis as any).__MapService = this;
@@ -28,12 +30,12 @@ export class MapService {
         let mapScheduler = newDefaultScheduler();
 
         // Debug stream:
-        let stringRendering = (result: String) => {this.out.innerHTML = `${result}`; };
-        let asString = combine(
-            MapService.combine,
-            this.locationService.coordinate$,
-            this.orientationService.orientationSymbol$);
-        let renderStringStream = tap(stringRendering, asString);
+        let outputAsString = (coordinates: GeolocationCoordinates) => {
+            this.outDebug.innerHTML = `${MapService.coordinatesToString(coordinates)}`; 
+            this.outSpeed.innerHTML = `${MapService.speedToString(coordinates)}`; 
+        };
+        let payload: [GeolocationCoordinates, string];
+        let renderStringStream = tap(outputAsString, this.locationService.coordinate$);
         runEffects(renderStringStream, mapScheduler);
 
         // Map updates:
@@ -70,7 +72,7 @@ export class MapService {
     }
 
     private updateMapOnce(coordinates: GeolocationCoordinates): void {
-        console.log(`First map impression at ${MapService.print(coordinates)}`);
+        console.log(`First map impression at ${MapService.coordinatesToString(coordinates)}`);
         let map = MapService.Instance().map;
         if (map === null) {
             console.error(`Map unavailable`);
@@ -88,7 +90,7 @@ export class MapService {
      }
 
     private updateMap(coordinates: GeolocationCoordinates): void {
-        console.log(`Panning the map to ${MapService.print(coordinates)}`);
+        console.log(`Panning the map to ${MapService.coordinatesToString(coordinates)}`);
         if (MapService.Instance().map === undefined) {
             console.error(`Map unavailable`);
             return;
@@ -115,7 +117,7 @@ export class MapService {
     }
 
     private updateMarkers(data: DataPoint): void {
-        console.log(`Adding marker at ${MapService.print(data.coordinates)}`);
+        console.log(`Adding marker at ${MapService.coordinatesToString(data.coordinates)}`);
         let map = MapService.Instance().map;
         if (map === null) {
             console.error(`Map unavailable`);
@@ -129,16 +131,16 @@ export class MapService {
         MapService.Instance().markers.push(marker);
     }
 
-    private static combine(coordinates: GeolocationCoordinates, orientation: string): string {
-        return `${MapService.print(coordinates)}, ${orientation}`;
-    }
-
-    private static print(coordinates: GeolocationCoordinates): string {
+    private static coordinatesToString(coordinates: GeolocationCoordinates): string {
         // See https://en.wikipedia.org/wiki/ISO_6709
         let latHemi = coordinates.latitude > 0 ? 'N' : 'S';
         let longHemi = coordinates.longitude > 0 ? 'E' : 'W';
+        return `${coordinates.latitude.toFixed(5)}${latHemi}, ${coordinates.longitude.toFixed(5)}${longHemi}`;
+    }
+
+    private static speedToString(coordinates: GeolocationCoordinates): string {
         let speed = coordinates.speed?.toFixed(3);
-        return `${coordinates.latitude.toFixed(6)}${latHemi}, ${coordinates.longitude.toFixed(6)}${longHemi}. ${speed} speed`;
+        return `${speed} speed`;
     }
 }
 
